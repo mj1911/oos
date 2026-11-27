@@ -135,6 +135,20 @@
 		regulator-max-microvolt = <3300000>;
 	};
 
+	/*
+	 * Test (not for upstream): vcc_3v0 (RK808 LDO8) is boot-on at a fixed 3.0 V. Named here as a fixed
+	 * regulator for the PMU IO domain only, so rockchip-iodomain need not wait for the PMIC and switches
+	 * pmu1830 from its reset 1.8 V mode to 3.0 V before ttyS2 starts.
+	 */
+	pmu1830_early: pmu1830-early {
+		compatible = "regulator-fixed";
+		regulator-name = "pmu1830_early";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+	};
+
 	vcc5v0_host: vcc5v0-host-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_host";
@@ -855,7 +869,7 @@
 };
 
 &pmu_io_domains {
-	pmu1830-supply = <&vcc_3v0>;
+	pmu1830-supply = <&pmu1830_early>;
 	status = "okay";
 };
 

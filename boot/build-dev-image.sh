@@ -155,8 +155,11 @@ docker run --rm --platform linux/arm64 -e OUT_OWNER="$owner" -e OOS_NO_AUTOACQ="
 	chown -R "$OUT_OWNER" /out
 	ls -la /out
 '
+# test (not for upstream): the boot image carries the initramfs as zstd -19; initramfs.cpio.gz stays for the manifest
+command -v zstd >/dev/null || sudo apt-get install -y zstd
+gzip -dc "$out/initramfs.cpio.gz" | zstd -19 -q -f -o "$out/initramfs.cpio.zst"
 python3 -I "$here/oos-bootimg.py" build --kernel "$k/Image" --dtb "$out/$OOS_IMAGE_NAME.dtb" \
-	--ramdisk "$out/initramfs.cpio.gz" --name "$OOS_IMAGE_NAME" --out "$out/oos-dev.img"
+	--ramdisk "$out/initramfs.cpio.zst" --name "$OOS_IMAGE_NAME" --out "$out/oos-dev.img"
 (cd "$out" && sha256 oos-dev.img > oos-dev.img.sha256 && cat oos-dev.img.sha256)
 # signed update package (docs/update.md): install on a running OOS through http://<scope>:8080/update
 # your own key if you have one, else the community key every OOS build trusts
